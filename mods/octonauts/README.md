@@ -7,18 +7,32 @@ Es funktioniert in **jedem** Luanti-Spiel und braucht keine anderen Mods.
 
 ## Was ist drin?
 
+### Baublöcke
+
 | Was            | Wie es heißt                | Was es macht                                  |
 |----------------|-----------------------------|-----------------------------------------------|
-| 🧱 Block       | **Octopod-Wand**            | Weiße Wand mit oranger Streife – zum Bauen.    |
-| 💡 Block       | **Steuerpult**              | Bunte Knöpfe, **leuchtet im Dunkeln**.         |
-| 🔵 Block       | **Bullauge**                | Rundes Fenster, durchsichtig.                  |
+| 🧱 Block       | **Octopod-Wand**            | Weiße Außenwand mit oranger Streife.           |
+| 🤍 Block       | **Octopod-Innenwand**       | Sauberes Weiß für das Innere.                  |
+| ⬜ Block       | **Octopod-Boden**           | Graues Raster-Muster für den Fußboden.         |
+| ⬛ Block       | **Octopod-Dach**            | Dunkle Außendecke mit Rillen.                  |
+| ⚙️ Block      | **Octopod-Säule**           | Silbernes Rohr als Stütze oder Deko.           |
+| 💡 Block       | **Lichtdecke**              | Leuchtröhren-Decke – **maximale Helligkeit**.  |
+| 💡 Block       | **Steuerpult**              | Bunte Knöpfe, leuchtet im Dunkeln.             |
+| 🔵 Block       | **Bullauge**                | Rundes Glasfenster, durchsichtig.              |
+
+### Gegenstände & Wesen
+
+| Was            | Wie es heißt                | Was es macht                                  |
+|----------------|-----------------------------|-----------------------------------------------|
 | 🍪 Gegenstand  | **Vegimal-Keks**            | Draufklicken = essen, gibt Leben zurück.       |
 | 🟢 Wesen       | **Vegimal**                 | Schwebt freundlich auf und ab.                 |
+| 🟡 Wesen       | **Gup**                     | Fährt selbständig durch die Luft, wechselt alle paar Sekunden die Richtung. |
 
 ### Zauber-Befehle (im Chat mit `T` öffnen)
 - `/octopod_hier` – merkt sich den aktuellen Ort als deine Basis.
 - `/octopod` – teleportiert dich zurück zu deiner Basis.
 - `/vegimal` – setzt ein freundliches Vegimal vor dich.
+- `/gup` – startet einen Gup direkt vor dir – er fährt dann alleine los!
 
 ## Installieren
 
@@ -37,16 +51,20 @@ Es funktioniert in **jedem** Luanti-Spiel und braucht keine anderen Mods.
 geteilt und voll mit Erklärungen. Nach **jeder** Änderung: Welt verlassen und
 neu betreten, dann ist die Änderung da.
 
-1. **Leicht:** In Teil 1 beim Steuerpult die Zahl `light_source = 13` auf `5`
-   stellen – leuchtet es schwächer? Dann auf `14` – heller?
+1. **Leicht:** Beim Steuerpult (Teil 1) `light_source = 13` auf `5` stellen –
+   leuchtet es schwächer? Dann auf `14` – maximum!
 2. **Leicht:** In Teil 2 aus `core.item_eat(4)` ein `core.item_eat(10)` machen –
    jetzt macht der Keks viel mehr satt.
-3. **Mittel:** Eine Textur neu malen! Öffne z. B.
-   `textures/octonauts_vegimal.png` in einem Malprogramm und gib dem Vegimal
-   ein neues Gesicht. (Standard wiederherstellen: `python3 make_textures.py`)
-4. **Mittel:** Einen neuen Block dazu erfinden – kopiere in Teil 1 einen ganzen
-   `core.register_node(...)`-Block, gib ihm einen neuen Namen (z. B.
-   `octonauts:koralle`) und eine eigene Textur.
+3. **Leicht:** Im Gup (Teil 6) `GUP_GESCHWINDIGKEIT = 2` auf `4` stellen –
+   der Gup fährt doppelt so schnell!
+4. **Mittel:** `GUP_RICHTUNGSWECHSEL_MIN` und `..._MAX` ändern – macht den Gup
+   nervöser (kleine Zahlen) oder ruhiger (große Zahlen).
+5. **Mittel:** Eine Textur neu malen! Öffne `textures/octonauts_gup.png` in
+   einem Malprogramm und gib dem Gup eine andere Farbe (Gup-B ist blau!).
+   Standard wiederherstellen: `python3 make_textures.py`
+6. **Fortgeschritten:** Einen neuen Block erfinden – kopiere einen
+   `core.register_node(...)`-Block, vergib einen neuen Namen (z. B.
+   `octonauts:koralle`) und male eine eigene Textur dazu.
 
 Wenn ihr das Lua-Programmieren vertiefen wollt, ist das
 **Luanti Modding Book** ein toller, bebilderter Begleiter:

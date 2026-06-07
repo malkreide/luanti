@@ -161,5 +161,139 @@ core.register_chatcommand("vegimal", {
 })
 
 
+--==========================================================================
+--  TEIL 5: OCTOPOD-BAUSET  (passende Bloecke zum Zusammenbauen)
+--==========================================================================
+--  Alle diese Bloecke passen farblich und stilistisch zusammen.
+--  Probiert mal: baut einen Raum aus Innenwand + Boden + Dach + Saeule +
+--  Lichtdecke und schaut, wie ein echtes Octopod-Zimmer aussehen koennte!
+
+-- Saubere weisse Innenwand (fuer das Innere des Octopod)
+core.register_node("octonauts:inner_wall", {
+	description = "Octopod-Innenwand (weiss)",
+	tiles = {"octonauts_inner_wall.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 2},
+})
+
+-- Grauer Boden mit Raster-Muster
+core.register_node("octonauts:floor", {
+	description = "Octopod-Boden",
+	tiles = {"octonauts_floor.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 2},
+})
+
+-- Dunkles Dach / Decke von aussen
+core.register_node("octonauts:roof", {
+	description = "Octopod-Dach",
+	tiles = {"octonauts_roof.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 2},
+})
+
+-- Silberne Saeule  (Forscher-Aufgabe fuer spaeter: mache sie mit "nodebox"
+-- rund und duenner -- dann sieht sie wie eine echte Saeule aus!)
+core.register_node("octonauts:column", {
+	description = "Octopod-Saeule (silber)",
+	tiles = {"octonauts_column.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 2},
+})
+
+-- Leuchtende Decken-Lichtroehren  (leuchtet hell wie eine Raumstation)
+core.register_node("octonauts:light_panel", {
+	description = "Lichtdecke (leuchtet sehr hell)",
+	tiles = {"octonauts_light_panel.png"},
+	light_source = 14,                              -- maximale Helligkeit!
+	groups = {cracky = 3, oddly_breakable_by_hand = 2},
+})
+
+
+--==========================================================================
+--  TEIL 6: DER GUP  (ein fahrendes Mini-U-Boot)
+--==========================================================================
+--  Der Gup ist ein echtes Fahrzeug aus der Octonauts-Welt.
+--  Er schwimmt durch die Luft (und auch durch Wasser!) und wechselt
+--  alle paar Sekunden selbstaendig die Richtung.
+--
+--  Probiert mal: aendere "geschwindigkeit" von 2 auf 4 -- dann faehrt der
+--  Gup doppelt so schnell!
+
+local GUP_GESCHWINDIGKEIT = 2          -- <-- diese Zahl mal aendern!
+local GUP_RICHTUNGSWECHSEL_MIN = 2     -- mindestens 2 Sekunden geradeaus
+local GUP_RICHTUNGSWECHSEL_MAX = 5     -- hoechstens 5 Sekunden geradeaus
+
+core.register_entity("octonauts:gup", {
+	initial_properties = {
+		visual          = "sprite",
+		textures        = {"octonauts_gup.png"},
+		visual_size     = {x = 2.5, y = 2.0},      -- gross genug um ihn gut zu sehen
+		collisionbox    = {-1.0, -0.7, -1.0, 1.0, 0.7, 1.0},
+		physical        = false,                    -- schwebt, faellt nicht
+		static_save     = false,                    -- verschwindet beim Neuladen
+	},
+
+	on_activate = function(self)
+		self.zeit         = 0
+		self.richtung_t   = 0
+		self.naechste_wahl = 0         -- sofort eine Richtung wuerfeln
+		self.vx           = 0
+		self.vy           = 0
+		self.vz           = 0
+	end,
+
+	on_step = function(self, dtime)
+		self.zeit       = self.zeit + dtime
+		self.richtung_t = self.richtung_t + dtime
+
+		-- Zeit fuer einen Richtungswechsel?
+		if self.richtung_t >= self.naechste_wahl then
+			self.richtung_t  = 0
+			self.naechste_wahl = GUP_RICHTUNGSWECHSEL_MIN +
+				math.random() * (GUP_RICHTUNGSWECHSEL_MAX - GUP_RICHTUNGSWECHSEL_MIN)
+
+			if math.random() < 0.15 then
+				-- manchmal kurz anhalten (wie ein echter Gup, der schaut)
+				self.vx, self.vy, self.vz = 0, 0, 0
+			else
+				-- zufaelligen Winkel wuerfeln (horizontal)
+				local winkel = math.random() * math.pi * 2
+				local hoch   = (math.random() - 0.5) * GUP_GESCHWINDIGKEIT * 0.6
+				self.vx = math.cos(winkel) * GUP_GESCHWINDIGKEIT
+				self.vy = hoch
+				self.vz = math.sin(winkel) * GUP_GESCHWINDIGKEIT
+				-- Gup in Fahrtrichtung drehen
+				self.object:set_yaw(math.atan2(-self.vx, -self.vz))
+			end
+		end
+
+		-- Geschwindigkeit setzen (mit sanftem Auf-Ab-Schwingen ueberlagert)
+		local schwingen = math.sin(self.zeit * 1.8) * 0.25
+		self.object:set_velocity({
+			x = self.vx,
+			y = self.vy + schwingen,
+			z = self.vz,
+		})
+	end,
+})
+
+-- /gup  -> setzt einen Gup direkt vor den Spieler
+core.register_chatcommand("gup", {
+	description = "Setzt einen Gup vor dich (er faehrt dann alleine los!)",
+	func = function(name, param)
+		local spieler = core.get_player_by_name(name)
+		if not spieler then
+			return false, "Kein Spieler gefunden."
+		end
+		local pos  = spieler:get_pos()
+		local blick = spieler:get_look_dir()
+		local ziel = {
+			x = pos.x + blick.x * 3,
+			y = pos.y + 1.5,
+			z = pos.z + blick.z * 3,
+		}
+		core.add_entity(ziel, "octonauts:gup")
+		return true, "Gup startet! Haltet euch fest! 🟡🐙"
+	end,
+})
+
+
 -- Eine kleine Nachricht ins Server-Log, damit man sieht: das Mod laeuft.
 core.log("action", "[octonauts] Das Octonauts-Starter-Mod ist geladen. Gute Reise! ⚓")
