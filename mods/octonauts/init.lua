@@ -290,7 +290,255 @@ core.register_chatcommand("gup", {
 			z = pos.z + blick.z * 3,
 		}
 		core.add_entity(ziel, "octonauts:gup")
+		-- Tuut-Tuut! (Sound-Datei liegt in sounds/octonauts_gup_horn.ogg)
+		core.sound_play("octonauts_gup_horn", {
+			pos             = ziel,
+			gain            = 1.0,
+			max_hear_distance = 32,
+		})
 		return true, "Gup startet! Haltet euch fest! 🟡🐙"
+	end,
+})
+
+
+--==========================================================================
+--  TEIL 7: KORALLENRIFF-BAUSET
+--==========================================================================
+--  Diese Bloecke sind fuer das Meer gemacht!
+--  Baut sie zusammen mit Wasser fuer ein echtes Oktonauten-Riff.
+--  Probiert mal: stellt euch ins Wasser und tippt /korallen_bauen
+--  dann erscheint ein ganzes Riff um euch herum!
+
+-- Rote Ast-Koralle (waechst wie ein Baum)
+core.register_node("octonauts:coral_red", {
+	description = "Rote Koralle",
+	tiles = {"octonauts_coral_red.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 3},
+})
+
+-- Blaue Faecher-Koralle
+core.register_node("octonauts:coral_blue", {
+	description = "Blaue Koralle",
+	tiles = {"octonauts_coral_blue.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 3},
+})
+
+-- Gehirnkoralle (sieht aus wie ein Gehirn, das ist kein Witz!)
+core.register_node("octonauts:coral_brain", {
+	description = "Gehirnkoralle",
+	tiles = {"octonauts_coral_brain.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 3},
+})
+
+-- Meeresboden-Sand (etwas dunkler als normaler Sand)
+core.register_node("octonauts:ocean_sand", {
+	description = "Meeresboden-Sand",
+	tiles = {"octonauts_ocean_sand.png"},
+	groups = {crumbly = 3, oddly_breakable_by_hand = 3},
+})
+
+-- Unterwasserfels mit gruenen Algen-Flecken
+core.register_node("octonauts:ocean_rock", {
+	description = "Unterwasserfels (mit Algen)",
+	tiles = {"octonauts_ocean_rock.png"},
+	groups = {cracky = 3, oddly_breakable_by_hand = 3},
+})
+
+-- Seegras (Pflanze: geht durch Wasser, kann man nicht draufstehen)
+core.register_node("octonauts:seagrass", {
+	description = "Seegras",
+	drawtype = "plantlike",                         -- flache Pflanzen-Darstellung
+	tiles = {"octonauts_seagrass.png"},
+	inventory_image = "octonauts_seagrass.png",
+	paramtype = "light",
+	sunlight_propagates = true,
+	walkable = false,
+	buildable_to = true,                            -- kann durch Wasser ersetzt werden
+	groups = {oddly_breakable_by_hand = 3, flora = 1},
+})
+
+-- Seeanemone (Pflanze: bunte Tentakel)
+core.register_node("octonauts:anemone", {
+	description = "Seeanemone",
+	drawtype = "plantlike",
+	tiles = {"octonauts_anemone.png"},
+	inventory_image = "octonauts_anemone.png",
+	paramtype = "light",
+	sunlight_propagates = true,
+	walkable = false,
+	buildable_to = true,
+	groups = {oddly_breakable_by_hand = 3, flora = 1},
+})
+
+
+--==========================================================================
+--  TEIL 8: BAUMEISTER-BEFEHLE
+--==========================================================================
+--  Mit diesen Befehlen erschafft ihr auf Knopfdruck eine fertige Welt!
+--
+--  /octopod_bauen  -->  ein ganzes Octopod-Zimmer waechst um euch herum
+--  /korallen_bauen -->  ein Korallenriff erscheint vor euren Fuessen
+
+-- Hilfsfunktion: setzt einen Block an einer Position relativ zum Spieler
+local function s(basis, dx, dy, dz, block)
+	core.set_node({
+		x = basis.x + dx,
+		y = basis.y + dy,
+		z = basis.z + dz,
+	}, {name = block})
+end
+
+-- Hilfsfunktion: raeume einen quaderfoermigen Bereich leer (Luft)
+local function leere(basis, x1, y1, z1, x2, y2, z2)
+	for dx = x1, x2 do
+		for dy = y1, y2 do
+			for dz = z1, z2 do
+				s(basis, dx, dy, dz, "air")
+			end
+		end
+	end
+end
+
+-- /octopod_bauen  -----------------------------------------------------------
+core.register_chatcommand("octopod_bauen", {
+	description = "Baut ein Octopod-Zimmer um den Spieler herum",
+	privs = {interact = true},
+	func = function(name, param)
+		local spieler = core.get_player_by_name(name)
+		if not spieler then return false, "Kein Spieler gefunden." end
+
+		-- Spielerposition auf ganze Zahl runden (Bloecke sind ganze Zahlen)
+		local p = vector.floor(spieler:get_pos())
+
+		-- Masse: hw = halbe Breite (Raum wird 2*hw+1 = 9 Bloecke breit)
+		--         ht = Innenhoehe (4 Bloecke - gut fuer Spieler + Luft)
+		local hw, ht = 4, 4
+
+		-- 1. Alles erst leeren (damit kein alter Block steckenbleibt)
+		leere(p, -hw, -1, -hw, hw, ht, hw)
+
+		-- 2. Boden
+		for dx = -hw, hw do
+			for dz = -hw, hw do
+				s(p, dx, -1, dz, "octonauts:floor")
+			end
+		end
+
+		-- 3. Leuchtende Decke
+		for dx = -hw, hw do
+			for dz = -hw, hw do
+				s(p, dx, ht, dz, "octonauts:light_panel")
+			end
+		end
+
+		-- 4. Vier Ausssenwaende
+		for dy = 0, ht - 1 do
+			for i = -hw, hw do
+				s(p,   i, dy, -hw, "octonauts:octopod_wall")  -- Suedwand
+				s(p,   i, dy,  hw, "octonauts:octopod_wall")  -- Nordwand
+				s(p, -hw, dy,   i, "octonauts:octopod_wall")  -- Westwand
+				s(p,  hw, dy,   i, "octonauts:octopod_wall")  -- Ostwand
+			end
+		end
+
+		-- 5. Bullaugen: je eines in der Mitte jeder Wand, auf halber Hoehe
+		local my = math.floor(ht / 2)
+		s(p,   0, my, -hw, "octonauts:bullauge")
+		s(p,   0, my,  hw, "octonauts:bullauge")
+		s(p, -hw, my,   0, "octonauts:bullauge")
+		s(p,  hw, my,   0, "octonauts:bullauge")
+
+		-- 6. Innensaeulen an den vier Ecken (eine Reihe innen)
+		local ci = hw - 1
+		for dy = 0, ht - 1 do
+			s(p, -ci, dy, -ci, "octonauts:column")
+			s(p,  ci, dy, -ci, "octonauts:column")
+			s(p, -ci, dy,  ci, "octonauts:column")
+			s(p,  ci, dy,  ci, "octonauts:column")
+		end
+
+		-- 7. Steuerpult an der Suedseite (innen, am Boden)
+		s(p, 0, 0, -(hw - 1), "octonauts:control_panel")
+
+		return true, "Das Octopod ist gebaut! Schaut euch um! 🐙  (Tipp: /octopod_hier nicht vergessen)"
+	end,
+})
+
+
+-- /korallen_bauen  ----------------------------------------------------------
+core.register_chatcommand("korallen_bauen", {
+	description = "Laesst ein Korallenriff um den Spieler herum entstehen",
+	privs = {interact = true},
+	func = function(name, param)
+		local spieler = core.get_player_by_name(name)
+		if not spieler then return false, "Kein Spieler gefunden." end
+
+		local p = vector.floor(spieler:get_pos())
+		local sz = 5   -- Halbgroesse: Riff ist 11x11 Bloecke
+
+		-- 1. Bereich leeren und Meeresboden legen
+		leere(p, -sz, 0, -sz, sz, 6, sz)
+		for dx = -sz, sz do
+			for dz = -sz, sz do
+				s(p, dx, -1, dz, "octonauts:ocean_sand")
+			end
+		end
+
+		-- 2. Korallengruppen (vordesigntes Layout)
+		--    Format: {dx, dz, hoehe, block}
+		local korallen = {
+			-- rote Gruppe (links hinten)
+			{-4, -4, 3, "octonauts:coral_red"},
+			{-3, -4, 2, "octonauts:coral_red"},
+			{-4, -3, 2, "octonauts:coral_red"},
+			{-3, -3, 4, "octonauts:coral_red"},
+			-- blaue Gruppe (rechts vorne)
+			{ 3,  3, 3, "octonauts:coral_blue"},
+			{ 4,  3, 2, "octonauts:coral_blue"},
+			{ 3,  4, 4, "octonauts:coral_blue"},
+			{ 4,  4, 2, "octonauts:coral_blue"},
+			-- Gehirnkorallen (rechts hinten + links vorne)
+			{ 3, -4, 2, "octonauts:coral_brain"},
+			{ 4, -3, 2, "octonauts:coral_brain"},
+			{-4,  3, 2, "octonauts:coral_brain"},
+			{-3,  4, 2, "octonauts:coral_brain"},
+			-- Mitte: grosser Korallen-Turm
+			{ 0,  0, 5, "octonauts:coral_red"},
+			{ 1,  0, 3, "octonauts:coral_blue"},
+			{-1,  0, 3, "octonauts:coral_blue"},
+			{ 0,  1, 4, "octonauts:coral_brain"},
+			{ 0, -1, 3, "octonauts:coral_brain"},
+		}
+		for _, k in ipairs(korallen) do
+			for dy = 0, k[3] - 1 do
+				s(p, k[1], dy, k[2], k[4])
+			end
+		end
+
+		-- 3. Felsen (leicht erhoben)
+		local felsen = {{-4, 0}, {0, -4}, {4, -1}, {-2, 4}, {2, -3}, {-5, -2}, {5, 2}}
+		for _, f in ipairs(felsen) do
+			s(p, f[1],  0, f[2], "octonauts:ocean_rock")
+			s(p, f[1],  1, f[2], "octonauts:ocean_rock")
+		end
+
+		-- 4. Seegras (ueberall auf dem Sand verteilt)
+		local gras = {
+			{-2,-1},{-1,-2},{ 1, 1},{ 2,-1},{ 0, 2},{-1, 1},
+			{ 3, 0},{ 0,-3},{-3, 0},{ 1,-2},{-2, 2},{ 4,-2},
+			{-4, 1},{ 2, 4},{ 0, 3},{-3,-1},{ 1,-4},{-1, 3},
+		}
+		for _, g in ipairs(gras) do
+			s(p, g[1], 0, g[2], "octonauts:seagrass")
+		end
+
+		-- 5. Seeanemonen (etwas seltener, an schattigen Stellen)
+		local anemonen = {{-4, 2},{3, -3},{-2, 5},{4, -5},{-5, 4},{1, 5}}
+		for _, a in ipairs(anemonen) do
+			s(p, a[1], 0, a[2], "octonauts:anemone")
+		end
+
+		return true, "Ein Korallenriff ist aufgetaucht! Willkommen in der Tiefsee! 🪸🐠"
 	end,
 })
 

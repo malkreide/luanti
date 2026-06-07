@@ -242,6 +242,114 @@ def gup():
     return p
 
 
+# --- Rote Ast-Koralle ---
+def coral_red():
+    p = grid((190, 55, 35, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            # Ast-Muster: senkrechte + diagonale Linien
+            if x % 5 == 2 or (x + y) % 7 == 0:
+                p[y][x] = (140, 30, 20, 255)
+            if (x + y) % 11 == 0:
+                p[y][x] = (220, 90, 60, 255)   # Highlights
+    return p
+
+
+# --- Blaue Faecher-Koralle ---
+def coral_blue():
+    p = grid((45, 110, 200, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            # Faecher-Muster: horizontale Wellen
+            import math as _m
+            wave = int(_m.sin(x * 0.8 + y * 0.3) * 2)
+            if (y + wave) % 4 == 0:
+                p[y][x] = (25, 75, 160, 255)   # Rippen
+            if (y + wave) % 4 == 2:
+                p[y][x] = (80, 160, 240, 255)  # Highlights
+    return p
+
+
+# --- Gehirnkoralle (Beige mit gewundenen Furchen) ---
+def coral_brain():
+    p = grid((215, 170, 130, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            import math as _m
+            furche = _m.sin(x * 0.9) * 2 + _m.cos(y * 0.7) * 2
+            if abs(furche) < 0.5:
+                p[y][x] = (160, 115, 80, 255)  # Furchen
+            elif furche > 2.5:
+                p[y][x] = (235, 195, 160, 255) # Kammruecken
+    return p
+
+
+# --- Meeresboden-Sand ---
+def ocean_sand():
+    p = grid((200, 180, 120, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            import math as _m
+            ripple = int(_m.sin(x * 1.2 + y * 0.4) * 15)
+            r = max(170, min(230, 200 + ripple))
+            g = max(155, min(200, 180 + ripple // 2))
+            b = max(100, min(140, 120 + ripple // 3))
+            p[y][x] = (r, g, b, 255)
+    return p
+
+
+# --- Unterwasserfels mit Algen-Flecken ---
+def ocean_rock():
+    p = grid((75, 85, 65, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if dist(x, y, 4, 4) < 2.5 or dist(x, y, 12, 10) < 3.0 or dist(x, y, 7, 13) < 2.0:
+                p[y][x] = (55, 130, 70, 255)   # grüne Algen-Flecken
+            if dist(x, y, 10, 5) < 1.5:
+                p[y][x] = (95, 105, 85, 255)   # hellere Fels-Einschlüsse
+    return p
+
+
+# --- Seegras (Pflanze: transparenter Hintergrund, grüne Straehnen) ---
+def seagrass():
+    p = grid((0, 0, 0, 0))
+    straehnen = [2, 6, 10, 14]
+    import math as _m
+    for x0 in straehnen:
+        for y in range(SIZE):
+            # wellenfoermige Auslenkung
+            biegung = int(_m.sin(y * 0.55) * 1.5)
+            for dx in range(-1, 2):
+                x = x0 + biegung + dx
+                if 0 <= x < SIZE:
+                    gruen = 120 + (SIZE - y) * 5
+                    p[y][x] = (30, min(200, gruen), 50, 255)
+    return p
+
+
+# --- Seeanemone (Pflanze: Tentakel in Lila/Rosa) ---
+def anemone():
+    p = grid((0, 0, 0, 0))
+    import math as _m
+    # Fuss
+    for y in range(12, SIZE):
+        for x in range(6, 10):
+            p[y][x] = (100, 60, 120, 255)
+    # Tentakel (8 Stueck, die nach oben spreizen)
+    for i in range(8):
+        winkel = (i / 8) * _m.pi * 2
+        for t in range(7):
+            frac = t / 6.0
+            x = int(7.5 + _m.cos(winkel) * frac * 5)
+            y = int(11  - _m.sin(abs(_m.cos(winkel * 2))) * frac * 8 - frac * 3)
+            if 0 <= x < SIZE and 0 <= y < SIZE:
+                r = 200 + int(_m.cos(winkel) * 30)
+                g = 80
+                b = 180 + int(_m.sin(winkel) * 40)
+                p[y][x] = (min(255, r), g, min(255, b), 255)
+    return p
+
+
 if __name__ == "__main__":
     os.makedirs(HERE, exist_ok=True)
     write_png("octonauts_octopod_wall.png",     octopod_wall())
@@ -255,4 +363,11 @@ if __name__ == "__main__":
     write_png("octonauts_column.png",           column())
     write_png("octonauts_light_panel.png",      light_panel())
     write_png("octonauts_gup.png",              gup())
+    write_png("octonauts_coral_red.png",        coral_red())
+    write_png("octonauts_coral_blue.png",       coral_blue())
+    write_png("octonauts_coral_brain.png",      coral_brain())
+    write_png("octonauts_ocean_sand.png",       ocean_sand())
+    write_png("octonauts_ocean_rock.png",       ocean_rock())
+    write_png("octonauts_seagrass.png",         seagrass())
+    write_png("octonauts_anemone.png",          anemone())
     print("Fertig! Alle Texturen liegen in:", HERE)
