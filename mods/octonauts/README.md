@@ -20,15 +20,32 @@ Es funktioniert in **jedem** Luanti-Spiel und braucht keine anderen Mods.
 | 💡 Block       | **Steuerpult**              | Bunte Knöpfe, leuchtet im Dunkeln.             |
 | 🔵 Block       | **Bullauge**                | Rundes Glasfenster, durchsichtig.              |
 
+### Korallenriff-Bauset
+
+| Was           | Wie es heißt                | Was es macht                                  |
+|---------------|-----------------------------|-----------------------------------------------|
+| 🔴 Block      | **Rote Koralle**            | Roter Ast-Korallen-Block.                     |
+| 🔵 Block      | **Blaue Koralle**           | Blauer Fächer-Korallen-Block.                 |
+| 🟤 Block      | **Gehirnkoralle**           | Beige gewundene Gehirnkoralle.                |
+| 🟨 Block      | **Meeresboden-Sand**        | Dunklerer Sand für den Meeresgrund.            |
+| ⬛ Block      | **Unterwasserfels**         | Dunkelgrauer Fels mit grünen Algenflecken.    |
+| 🌿 Pflanze    | **Seegras**                 | Grüne Strähnen, man kann durchlaufen.         |
+| 🪸 Pflanze    | **Seeanemone**              | Lila Tentakel, dekorativ.                     |
+
 ### Gegenstände & Wesen
 
 | Was            | Wie es heißt                | Was es macht                                  |
 |----------------|-----------------------------|-----------------------------------------------|
 | 🍪 Gegenstand  | **Vegimal-Keks**            | Draufklicken = essen, gibt Leben zurück.       |
 | 🟢 Wesen       | **Vegimal**                 | Schwebt freundlich auf und ab.                 |
-| 🟡 Wesen       | **Gup**                     | Fährt selbständig durch die Luft, wechselt alle paar Sekunden die Richtung. |
+| 🟡 Wesen       | **Gup**                     | Fährt selbständig, wechselt Richtung, hupt beim Starten. |
 
-### Zauber-Befehle (im Chat mit `T` öffnen)
+### Baumeister-Befehle (bauen ganze Szenen auf einen Schlag)
+
+- `/octopod_bauen` – ein komplettes **Octopod-Zimmer** (9×9, 4 hoch, mit Wänden, Bullaugen, Säulen, Steuerpult, Lichtdecke) erscheint um dich herum.
+- `/korallen_bauen` – ein **Korallenriff** (11×11, mit Meeresbodens, Korallengruppen, Felsen, Seegras, Anemonen) erscheint vor deinen Füßen.
+
+### Weitere Befehle
 - `/octopod_hier` – merkt sich den aktuellen Ort als deine Basis.
 - `/octopod` – teleportiert dich zurück zu deiner Basis.
 - `/vegimal` – setzt ein freundliches Vegimal vor dich.
@@ -62,9 +79,14 @@ neu betreten, dann ist die Änderung da.
 5. **Mittel:** Eine Textur neu malen! Öffne `textures/octonauts_gup.png` in
    einem Malprogramm und gib dem Gup eine andere Farbe (Gup-B ist blau!).
    Standard wiederherstellen: `python3 make_textures.py`
-6. **Fortgeschritten:** Einen neuen Block erfinden – kopiere einen
+6. **Mittel:** `/octopod_bauen` eintippen → ein ganzes Zimmer erscheint. Dann
+   das Octopod mit `/korallen_bauen` in der Nähe vervollständigen – Fenster
+   öffnen aufs Riff!
+7. **Mittel:** Den Sound des Gups ersetzen: tausche
+   `sounds/octonauts_gup_horn.ogg` gegen eine eigene OGG-Aufnahme aus.
+8. **Fortgeschritten:** Einen neuen Block erfinden – kopiere einen
    `core.register_node(...)`-Block, vergib einen neuen Namen (z. B.
-   `octonauts:koralle`) und male eine eigene Textur dazu.
+   `octonauts:muschel`) und male eine eigene Textur dazu.
 
 Wenn ihr das Lua-Programmieren vertiefen wollt, ist das
 **Luanti Modding Book** ein toller, bebilderter Begleiter:
