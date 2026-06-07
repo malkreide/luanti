@@ -129,11 +129,130 @@ def vegimal():
     return p
 
 
+# --- Octopod-Innenwand: saubes Weiss, leicht strukturiert ---
+def inner_wall():
+    p = grid((248, 250, 255, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if x == 0 or y == 0:
+                p[y][x] = (215, 220, 230, 255)   # Fugen
+            if x == SIZE - 1 or y == SIZE - 1:
+                p[y][x] = (225, 228, 238, 255)
+    return p
+
+
+# --- Octopod-Boden: graues Raster mit Trittschutz-Muster ---
+def floor_tile():
+    p = grid((185, 190, 200, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if x % 8 == 0 or y % 8 == 0:
+                p[y][x] = (145, 150, 160, 255)   # Rasterlinien
+            if (x + y) % 8 == 0:
+                p[y][x] = (165, 170, 180, 255)   # diagonaler Grip
+    return p
+
+
+# --- Octopod-Dach: dunkelgrau, dezentes Riffel-Muster ---
+def roof_tile():
+    p = grid((80, 85, 95, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if y % 4 == 0:
+                p[y][x] = (65, 70, 80, 255)      # horizontale Rillen
+            if x == 0 or x == SIZE - 1:
+                p[y][x] = (60, 65, 75, 255)
+    return p
+
+
+# --- Octopod-Saeule: silbernes Rohr mit zylindrischer Schattierung ---
+def column():
+    p = grid((0, 0, 0, 0))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            dx = x - 7.5
+            if abs(dx) <= 5:
+                # einfaches Zylindermodell: Mitte hell, Rand dunkel
+                intensity = int(210 - (dx / 5) ** 2 * 80)
+                r = max(120, min(220, intensity))
+                p[y][x] = (r, r + 5, r + 15, 255)
+            if y == 0 or y == SIZE - 1:
+                # Ringe an den Enden
+                for x2 in range(SIZE):
+                    if abs(x2 - 7.5) <= 5:
+                        p[y][x2] = (160, 165, 180, 255)
+    return p
+
+
+# --- Octopod-Lichtdecke: helle Leuchtroehren ---
+def light_panel():
+    p = grid((255, 255, 245, 255))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            # 3 Leuchtroehren
+            if 2 <= y <= 5 or 6 <= y <= 9 or 10 <= y <= 13:
+                col = (255, 255, 210, 255) if x % 3 != 0 else (230, 230, 190, 255)
+                p[y][x] = col
+            if y in (2, 5, 6, 9, 10, 13):
+                p[y][x] = (190, 192, 200, 255)   # Halter-Streifen
+            if x == 0 or x == SIZE - 1 or y == 0 or y == SIZE - 1:
+                p[y][x] = (180, 182, 190, 255)   # Rahmen
+    return p
+
+
+# --- Gup: gelbes Octonauts-U-Boot (Frontansicht) ---
+def gup():
+    p = grid((0, 0, 0, 0))
+    for y in range(SIZE):
+        for x in range(SIZE):
+            # Rumpf (oval, breiter als hoch)
+            dx = (x - 7.5) / 7.0
+            dy = (y - 9.0) / 5.5
+            if dx * dx + dy * dy < 1.0:
+                p[y][x] = (255, 195, 30, 255)    # kanarien-gelb
+    # dunkler Rand am Rumpf fuer Tiefe
+    for y in range(SIZE):
+        for x in range(SIZE):
+            dx = (x - 7.5) / 7.0
+            dy = (y - 9.0) / 5.5
+            d = dx * dx + dy * dy
+            if 0.88 < d < 1.0:
+                p[y][x] = (200, 140, 10, 255)
+    # grosses Bullauge (Cockpit)
+    for y in range(SIZE):
+        for x in range(SIZE):
+            if dist(x, y, 7.5, 9.5) < 3.4:
+                p[y][x] = (100, 200, 255, 220)
+            if 3.4 <= dist(x, y, 7.5, 9.5) < 4.0:
+                p[y][x] = (200, 140, 10, 255)    # goldener Ring
+    # Antenne
+    for y in range(1, 4):
+        p[y][7] = (160, 160, 160, 255)
+        p[y][8] = (160, 160, 160, 255)
+    # Warmlicht oben
+    for x in range(5, 11):
+        p[0][x] = (255, 80, 60, 255)
+    p[1][5] = (255, 80, 60, 255)
+    p[1][10] = (255, 80, 60, 255)
+    # Propeller-Andeutung unten
+    for x in range(3, 13):
+        p[14][x] = (160, 120, 10, 255)
+    p[15][5] = (140, 100, 8, 255)
+    p[15][10] = (140, 100, 8, 255)
+    return p
+
+
 if __name__ == "__main__":
     os.makedirs(HERE, exist_ok=True)
-    write_png("octonauts_octopod_wall.png", octopod_wall())
-    write_png("octonauts_control_panel.png", control_panel())
-    write_png("octonauts_bullauge.png", bullauge())
-    write_png("octonauts_vegimal_cookie.png", vegimal_cookie())
-    write_png("octonauts_vegimal.png", vegimal())
+    write_png("octonauts_octopod_wall.png",     octopod_wall())
+    write_png("octonauts_control_panel.png",    control_panel())
+    write_png("octonauts_bullauge.png",         bullauge())
+    write_png("octonauts_vegimal_cookie.png",   vegimal_cookie())
+    write_png("octonauts_vegimal.png",          vegimal())
+    write_png("octonauts_inner_wall.png",       inner_wall())
+    write_png("octonauts_floor.png",            floor_tile())
+    write_png("octonauts_roof.png",             roof_tile())
+    write_png("octonauts_column.png",           column())
+    write_png("octonauts_light_panel.png",      light_panel())
+    write_png("octonauts_gup.png",              gup())
     print("Fertig! Alle Texturen liegen in:", HERE)
