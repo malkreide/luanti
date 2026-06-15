@@ -39,6 +39,7 @@ Es funktioniert in **jedem** Luanti-Spiel und braucht keine anderen Mods.
 | 🍪 Gegenstand  | **Vegimal-Keks**            | Draufklicken = essen, gibt Leben zurück.       |
 | 🟢 Wesen       | **Vegimal**                 | Schwebt freundlich auf und ab.                 |
 | 🟡 Wesen       | **Gup**                     | Fährt selbständig, wechselt Richtung, hupt beim Starten. |
+| 🦀 Tier        | **Krabbe**                  | Echtes, laufendes Tier – **nur mit Mob-API** (siehe unten). |
 
 ### Baumeister-Befehle (bauen ganze Szenen auf einen Schlag)
 
@@ -50,6 +51,38 @@ Es funktioniert in **jedem** Luanti-Spiel und braucht keine anderen Mods.
 - `/octopod` – teleportiert dich zurück zu deiner Basis.
 - `/vegimal` – setzt ein freundliches Vegimal vor dich.
 - `/gup` – startet einen Gup direkt vor dir – er fährt dann alleine los!
+- `/krabbe` – setzt eine 🦀 **Krabbe** vor dich (nur wenn eine Mob-API da ist).
+
+## Optional: die Krabbe und die Mob-API 🦀
+
+Die **Krabbe** ist ein „echtes" Tier – es läuft herum, hat Leben (Herzen) und
+kann erschrecken. So etwas baut man nicht von Hand, sondern mit einer fertigen
+**Mob-API**. Dieser Mod unterstützt beide gängigen:
+
+| Mob-API | Für welches Spiel |
+|---------|-------------------|
+| **mobs_redo** (Mod-Name `mobs`) | Minetest Game und ähnliche |
+| **mcl_mobs** | VoxeLibre / Mineclonia |
+
+Das ist eine **optionale** Abhängigkeit (`optional_depends` in `mod.conf`):
+
+- Ist **eine** der beiden APIs installiert, gibt es die Krabbe samt Spawn-Ei,
+  und `/krabbe` funktioniert.
+- Ist **keine** da, läuft alles andere im Mod ganz normal weiter – nur die
+  lebende Krabbe fehlt dann. `/krabbe` sagt dir in dem Fall freundlich Bescheid.
+
+Im Code (Teil 9 von `init.lua`) prüfen wir das so:
+
+```lua
+local hat_mobs_redo = core.get_modpath("mobs")     ~= nil
+local hat_mcl_mobs  = core.get_modpath("mcl_mobs") ~= nil
+
+if hat_mobs_redo then
+    mobs:register_mob("octonauts:krabbe", { ... })       -- Variante mobs_redo
+elseif hat_mcl_mobs then
+    mcl_mobs.register_mob("octonauts:krabbe", { ... })   -- Variante mcl_mobs
+end
+```
 
 ## Installieren
 
@@ -87,6 +120,9 @@ neu betreten, dann ist die Änderung da.
 8. **Fortgeschritten:** Einen neuen Block erfinden – kopiere einen
    `core.register_node(...)`-Block, vergib einen neuen Namen (z. B.
    `octonauts:muschel`) und male eine eigene Textur dazu.
+9. **Fortgeschritten:** Wenn du eine Mob-API hast (mobs_redo oder mcl_mobs):
+   ändere bei der Krabbe (Teil 9) `walk_velocity = 1` auf `3` – jetzt flitzt
+   sie! Oder gib ihr mit `hp_max = 20` mehr Leben.
 
 Wenn ihr das Lua-Programmieren vertiefen wollt, ist das
 **Luanti Modding Book** ein toller, bebilderter Begleiter:

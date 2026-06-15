@@ -350,6 +350,54 @@ def anemone():
     return p
 
 
+# --- Krabbe: kleines rotes Krebstier (Sprite, Frontansicht) ---
+def krabbe():
+    p = grid((0, 0, 0, 0))
+    rot    = (220, 70, 40, 255)
+    dunkel = (150, 40, 20, 255)
+    hell   = (245, 120, 90, 255)
+
+    # Beinchen (je Seite drei kleine Striche) - zuerst, damit der Panzer
+    # spaeter darueber liegt.
+    for by in (8, 10, 12):
+        p[by][1] = dunkel
+        p[by][2] = dunkel
+        p[by][13] = dunkel
+        p[by][14] = dunkel
+
+    # Panzer (breites, flaches Oval in der Mitte)
+    for y in range(SIZE):
+        for x in range(SIZE):
+            dx = (x - 7.5) / 5.5
+            dy = (y - 9.0) / 3.2
+            d = dx * dx + dy * dy
+            if d < 1.0:
+                p[y][x] = rot
+            if 0.72 < d < 1.0:
+                p[y][x] = dunkel        # dunkler Panzerrand
+            if d < 0.35 and y < 9:
+                p[y][x] = hell          # Glanzlicht oben auf dem Panzer
+
+    # Zwei grosse Scheren (Klauen) oben aussen
+    for (cx, cy) in ((2.0, 6.0), (13.0, 6.0)):
+        for y in range(SIZE):
+            for x in range(SIZE):
+                d = dist(x, y, cx, cy)
+                if d < 2.3:
+                    p[y][x] = rot
+                if 1.6 < d < 2.3:
+                    p[y][x] = dunkel    # Kontur der Schere
+        p[int(cy)][int(cx)] = dunkel    # kleiner Spalt in der Schere
+
+    # Zwei Stielaugen oben auf dem Panzer
+    for ex in (5, 10):
+        p[5][ex] = dunkel               # Augenstiel
+        p[4][ex] = dunkel
+        p[3][ex] = (255, 255, 255, 255) # Augapfel weiss
+        p[2][ex] = (30, 30, 40, 255)    # Pupille
+    return p
+
+
 if __name__ == "__main__":
     os.makedirs(HERE, exist_ok=True)
     write_png("octonauts_octopod_wall.png",     octopod_wall())
@@ -370,4 +418,5 @@ if __name__ == "__main__":
     write_png("octonauts_ocean_rock.png",       ocean_rock())
     write_png("octonauts_seagrass.png",         seagrass())
     write_png("octonauts_anemone.png",          anemone())
+    write_png("octonauts_krabbe.png",           krabbe())
     print("Fertig! Alle Texturen liegen in:", HERE)
