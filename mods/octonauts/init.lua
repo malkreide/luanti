@@ -543,5 +543,120 @@ core.register_chatcommand("korallen_bauen", {
 })
 
 
+--==========================================================================
+--  TEIL 9: DIE KRABBE  (ein echtes Tier - braucht eine "Mob-API")
+--==========================================================================
+--  Bis hierher kam unser Mod ganz ohne Hilfe aus. Bloecke, Keks, Gup und
+--  Vegimal haben wir komplett selbst gebaut.
+--
+--  Ein "richtiges" Tier ist aber viel Arbeit: Es soll herumlaufen, Leben
+--  (Herzen) haben, vor Gefahr fliehen, vielleicht gezaehmt werden ...
+--  Dafuer gibt es fertige Helfer-Mods, eine sogenannte "Mob-API":
+--
+--    * mobs_redo  (heisst als Mod "mobs")  -> fuer Minetest Game & Co.
+--    * mcl_mobs                             -> fuer VoxeLibre / Mineclonia
+--
+--  Wir machen die Krabbe OPTIONAL: Ist eine dieser Mob-APIs da, bekommst du
+--  eine echte, laufende Krabbe. Ist KEINE da, ueberspringen wir sie einfach -
+--  alles andere im Mod funktioniert trotzdem ganz normal weiter.
+
+-- Zuerst nachschauen, welche Mob-API ueberhaupt vorhanden ist.
+-- "core.get_modpath(...)" gibt den Ordner zurueck, wenn die Mod da ist -
+-- sonst "nil" (also "nichts").
+local hat_mobs_redo = core.get_modpath("mobs")     ~= nil
+local hat_mcl_mobs  = core.get_modpath("mcl_mobs") ~= nil
+
+if hat_mobs_redo then
+	-- ===== Variante A: mobs_redo (Minetest Game) ==========================
+	mobs:register_mob("octonauts:krabbe", {
+		type            = "animal",                 -- ein friedliches Tier
+		passive         = true,                     -- tut niemandem etwas
+		hp_min          = 5,
+		hp_max          = 10,
+		armor           = 100,
+		collisionbox    = {-0.3, -0.3, -0.3, 0.3, 0.0, 0.3},
+		visual          = "sprite",                 -- flaches Bild wie beim Vegimal
+		textures        = {{"octonauts_krabbe.png"}},
+		visual_size     = {x = 0.9, y = 0.9},
+		makes_footstep_sound = false,
+		walk_velocity   = 1,                        -- gemuetliches Krabbeltempo
+		run_velocity    = 2,                        -- wenn sie erschrickt
+		jump            = true,
+		view_range      = 8,
+		fall_damage     = false,
+		water_damage    = 0,                        -- Krabben moegen Wasser :)
+		fear_height     = 4,
+	})
+	-- Spawn-Ei fuers Kreativ-Inventar (zum Hinsetzen der Krabbe):
+	mobs:register_egg("octonauts:krabbe", "Octonauts-Krabbe",
+		"octonauts_krabbe.png")
+
+elseif hat_mcl_mobs then
+	-- ===== Variante B: mcl_mobs (VoxeLibre / Mineclonia) ==================
+	mcl_mobs.register_mob("octonauts:krabbe", {
+		type            = "animal",
+		passive         = true,
+		hp_min          = 5,
+		hp_max          = 10,
+		xp_min          = 1,
+		xp_max          = 3,
+		armor           = 100,
+		collisionbox    = {-0.3, -0.3, -0.3, 0.3, 0.0, 0.3},
+		visual          = "sprite",
+		textures        = {{"octonauts_krabbe.png"}},
+		visual_size     = {x = 0.9, y = 0.9},
+		makes_footstep_sound = false,
+		walk_velocity   = 1,
+		run_velocity    = 2,
+		jump            = true,
+		view_range      = 8,
+		fall_damage     = false,
+		water_damage    = 0,
+		fear_height     = 4,
+	})
+	-- Spawn-Ei (mcl_mobs nutzt zwei Farben fuer das Ei-Aussehen):
+	mcl_mobs.register_egg("octonauts:krabbe", "Octonauts-Krabbe",
+		"#dc4628", "#96281466")
+end
+
+-- /krabbe  -> setzt eine Krabbe vor dich (falls eine Mob-API vorhanden ist)
+core.register_chatcommand("krabbe", {
+	description = "Setzt eine Krabbe vor dich (braucht eine Mob-API)",
+	func = function(name, param)
+		local spieler = core.get_player_by_name(name)
+		if not spieler then
+			return false, "Kein Spieler gefunden."
+		end
+
+		-- Gibt es ueberhaupt eine Krabbe? Nur wenn eine Mob-API da war.
+		if not (hat_mobs_redo or hat_mcl_mobs) then
+			return false, "Fuer eine echte Krabbe brauchst du eine Mob-API "
+				.. "(mobs_redo oder mcl_mobs). Alles andere im Mod geht aber!"
+		end
+
+		-- Ein Stueck vor den Spieler, in Blickrichtung, auf den Boden.
+		local pos   = spieler:get_pos()
+		local blick = spieler:get_look_dir()
+		local ziel  = {
+			x = pos.x + blick.x * 2,
+			y = pos.y,
+			z = pos.z + blick.z * 2,
+		}
+		core.add_entity(ziel, "octonauts:krabbe")
+		return true, "Eine Krabbe krabbelt heran! 🦀"
+	end,
+})
+
+-- Eine Notiz ins Log, damit man sieht, welcher Fall eingetreten ist.
+if hat_mobs_redo then
+	core.log("action", "[octonauts] Mob-API 'mobs_redo' gefunden - Krabbe ist aktiv. 🦀")
+elseif hat_mcl_mobs then
+	core.log("action", "[octonauts] Mob-API 'mcl_mobs' gefunden - Krabbe ist aktiv. 🦀")
+else
+	core.log("action", "[octonauts] Keine Mob-API gefunden - die Krabbe wird "
+		.. "uebersprungen, alles andere laeuft normal weiter.")
+end
+
+
 -- Eine kleine Nachricht ins Server-Log, damit man sieht: das Mod laeuft.
 core.log("action", "[octonauts] Das Octonauts-Starter-Mod ist geladen. Gute Reise! ⚓")
